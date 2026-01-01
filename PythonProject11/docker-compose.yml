@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  nlp-qa-system:
+    build: .
+    container_name: nlp-qa-system
+    ports:
+      - "7860:7860"  # Gradio界面
+      - "8000:8000"  # FastAPI接口
+    volumes:
+      # 挂载模型目录（如果需要使用本地模型）
+      - ./models:/app/models
+      # 挂载数据目录
+      - ./data:/app/data
+    environment:
+      - CUDA_VISIBLE_DEVICES=0  # 如果有GPU，可以指定GPU设备
+      - MODEL_NAME=meta-llama/Llama-2-7b-chat-hf
+      - USE_QUANTIZATION=true
+    # 如果需要GPU支持，取消下面的注释
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    restart: unless-stopped
+

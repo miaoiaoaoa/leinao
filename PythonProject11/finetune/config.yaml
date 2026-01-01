@@ -1,0 +1,72 @@
+# 微调配置文件
+
+# 模型配置
+model:
+  base_model_name: "meta-llama/Llama-2-7b-chat-hf"
+  use_quantization: false  # 是否使用4-bit量化
+  device_map: "auto"
+
+# 模型优化配置（裁剪与蒸馏）
+optimization:
+  # 模型裁剪配置
+  pruning:
+    enable: true          # 是否启用裁剪
+    ratio: 0.2           # 裁剪比例 (0.0-1.0)
+    method: "magnitude"   # 裁剪方法: magnitude, structured
+  
+  # 知识蒸馏配置
+  distillation:
+    enable: false        # 是否启用知识蒸馏
+    teacher_model: "meta-llama/Llama-2-7b-chat-hf"  # 教师模型路径
+    temperature: 5.0     # 蒸馏温度
+    alpha: 0.5          # 蒸馏损失权重 (0-1)
+
+# LoRA配置
+lora:
+  r: 8                    # LoRA rank
+  alpha: 16               # LoRA alpha
+  dropout: 0.05           # LoRA dropout
+  target_modules:         # 目标模块
+    - "q_proj"
+    - "v_proj"
+    - "k_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+
+# 训练配置
+training:
+  num_epochs: 3
+  batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 2.0e-4
+  warmup_steps: 100
+  save_steps: 500
+  logging_steps: 50
+  max_length: 2048
+  fp16: true
+
+# 数据配置
+data:
+  train_data_path: "data/finetune/train_train.jsonl"
+  val_data_path: "data/finetune/train_validation.jsonl"
+  test_data_path: "data/finetune/train_test.jsonl"
+  format_type: "alpaca"  # alpaca, qa
+
+# 输出配置
+output:
+  output_dir: "models/finetuned"
+  save_total_limit: 3
+
+# 评估配置
+evaluation:
+  max_new_tokens: 512
+  temperature: 0.7
+  top_p: 0.9
+
+# GGUF转换配置（用于Ollama）
+gguf:
+  quantization: "Q4_K_M"  # Q4_0, Q4_1, Q5_0, Q5_1, Q8_0, Q4_K_M, Q5_K_M
+  model_name: "llama2-finetuned"
+
